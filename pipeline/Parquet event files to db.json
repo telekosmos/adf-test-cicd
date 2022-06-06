@@ -1,0 +1,43 @@
+{
+	"name": "Parquet event files to db",
+	"properties": {
+		"description": "There are some preprocessed parquet files at sources/StagingEvents to move to db",
+		"activities": [
+			{
+				"name": "Copy data to db",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "ParquetSource",
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						}
+					},
+					"enableStaging": false
+				},
+				"inputs": [
+					{
+						"referenceName": "ParquetGeneric",
+						"type": "DatasetReference",
+						"parameters": {
+							"container": "sources",
+							"folder": "StagingEvents"
+						}
+					}
+				]
+			}
+		],
+		"annotations": []
+	}
+}
