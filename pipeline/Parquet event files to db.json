@@ -1,0 +1,177 @@
+{
+	"name": "Parquet event files to db",
+	"properties": {
+		"description": "There are some preprocessed parquet files at sources/StagingEvents to move to db",
+		"activities": [
+			{
+				"name": "Copy data to db",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "ParquetSource",
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": true,
+							"wildcardFileName": "*",
+							"enablePartitionDiscovery": false
+						}
+					},
+					"sink": {
+						"type": "AzureSqlSink",
+						"writeBehavior": "insert",
+						"sqlWriterUseTableLock": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "col1_date",
+									"type": "String",
+									"physicalType": "UTF8"
+								},
+								"sink": {
+									"name": "date",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "col2_device_category",
+									"type": "String",
+									"physicalType": "UTF8"
+								},
+								"sink": {
+									"name": "device_category",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "col3_channel_grouping",
+									"type": "String",
+									"physicalType": "UTF8"
+								},
+								"sink": {
+									"name": "channel_grouping",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "col4_event_category",
+									"type": "String",
+									"physicalType": "UTF8"
+								},
+								"sink": {
+									"name": "event_category",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "col5_event_action",
+									"type": "String",
+									"physicalType": "UTF8"
+								},
+								"sink": {
+									"name": "event_action",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "col6_users",
+									"type": "String",
+									"physicalType": "UTF8"
+								},
+								"sink": {
+									"name": "users",
+									"type": "Int32",
+									"physicalType": "int"
+								}
+							},
+							{
+								"source": {
+									"name": "col7_newusers",
+									"type": "String",
+									"physicalType": "UTF8"
+								},
+								"sink": {
+									"name": "newusers",
+									"type": "Int32",
+									"physicalType": "int"
+								}
+							},
+							{
+								"source": {
+									"name": "col8_sessions",
+									"type": "String",
+									"physicalType": "UTF8"
+								},
+								"sink": {
+									"name": "sessions",
+									"type": "Int32",
+									"physicalType": "int"
+								}
+							},
+							{
+								"source": {
+									"name": "col9_pageviews",
+									"type": "String",
+									"physicalType": "UTF8"
+								},
+								"sink": {
+									"name": "pageviews",
+									"type": "Int32",
+									"physicalType": "int"
+								}
+							}
+						],
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "ParquetGeneric",
+						"type": "DatasetReference",
+						"parameters": {
+							"container": "sources",
+							"folder": "StagingEvents"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "AzureSqlTable",
+						"type": "DatasetReference",
+						"parameters": {
+							"schema": "TTraining",
+							"table": "Events_cicd"
+						}
+					}
+				]
+			}
+		],
+		"annotations": []
+	}
+}

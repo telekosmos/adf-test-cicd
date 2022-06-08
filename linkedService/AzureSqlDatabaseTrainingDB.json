@@ -1,0 +1,18 @@
+{
+	"name": "AzureSqlDatabaseTrainingDB",
+	"properties": {
+		"annotations": [],
+		"type": "AzureSqlDatabase",
+		"typeProperties": {
+			"connectionString": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=telekosmos.database.windows.net;Initial Catalog=training;User ID=training",
+			"password": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "AzureKeyVault",
+					"type": "LinkedServiceReference"
+				},
+				"secretName": "SqlDatabaseTrainingPassword"
+			}
+		}
+	}
+}
