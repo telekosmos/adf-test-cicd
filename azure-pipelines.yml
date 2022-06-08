@@ -30,7 +30,7 @@ steps:
     command: 'custom'
     workingDir: '$(Build.Repository.LocalPath)' #replace with the package.json folder
     customCommand: 'run build validate $(Build.Repository.LocalPath) /subscriptions/fcc07500-2511-46e3-b998-221c12704a8d/resourceGroups/Training/providers/Microsoft.DataFactory/factories/TestCICDGit'
-  displayName: 'Validate'
+  displayName: 'Validate at workingDir ($(Build.Repository.LocalPath))'
 
 # Validate and then generate the ARM template into the destination folder, which is the same as selecting "Publish" from the UX.
 # The ARM template generated isn't published to the live version of the factory. Deployment should be done by using a CI/CD pipeline. 
