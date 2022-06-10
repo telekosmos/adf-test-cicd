@@ -1,6 +1,6 @@
 # adf-test-cicd
 
-Simple project to figure out how is the ADF CI/CD thing through Azure DevOps
+Simple ADF project aim to set up an ADF CI/CD pipelines in Azure DevOps
 
 ## Guide to set up repo + DevOps pipeline
 
@@ -12,23 +12,23 @@ Main difference with a application deployment is (it seems) we don't have local 
 
 ### Create resources
 
-First of all is creating resources in the Azure Portal or, much better, using some IaC tool. Terraform is preferred as it is widely used but if you are a Microsoft fan you can resort to [bicep](https://docs.microsoft.com/en-us/azure/azure-resource-manager/bicep/overview?tabs=bicep) to deploy resources to Azure.
+First of all is to create resources in the Azure Portal or, much better, using some IaC tool. Terraform is preferred as it is widely used but if you are a Microsoft fan you can resort to [bicep](https://docs.microsoft.com/en-us/azure/azure-resource-manager/bicep/overview?tabs=bicep) to deploy resources to Azure.
 
 We won't get deeper in the resource creation, just mention you should create three resource groups for development, uat and production, with same resources all of them and using a nice naming convention (👉 [inspiration](https://docs.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-naming)). Resources for a decent start data pipeline in every environment/resource group could be:
-- Data factory
-- Key vault
-- Storage account
-- SQL database
+- a Data factory
+- a Key vault
+- a Storage account
+- a (SQL) database
 
-**Key vault** will hold the credentials which will be used to access to database and storage account from the datasets defined in the DataFactory.
+**Key vault** will hold the credentials which will be used to access to database and storage account from the datasets defined in the DataFactory. The _connection_ with the vault is done through _Linked services_ in the Data Factory. Follow [this Azure document](https://docs.microsoft.com/bs-latn-ba/azure/data-factory/store-credentials-in-key-vault) on how to set it up. 
 
 ### Set up repository for DataFactory and DevOps
 
-Once in ADF _builder_, click on the top left **Set up code repository** [* photo *] button and follow the _wizard_ to connect the repo. Choose Azure DevOps Git and Active Directory then **Continue** at the bottom. Then follow the wizard to setup the actual repo properties. When you set the name in _Repository name_ you will see automatically new boxes to pre-filled. To follow the standard, leave them all as are.
+Once in ADF _builder_, click on the top left **Set up code repository** [- photo -] button and follow the _wizard_ to connect the repo. Choose _Azure DevOps Git_ and _Active Directory_ then **Continue** at the bottom. Then follow the wizard to setup the actual repo properties. When you set the name in _Repository name_ you will see automatically new boxes to pre-filled. To follow the standard, leave them all as are.
 
 This repo is now a usual one, where the `master`/`main` branch will be the so-called _collaboration branch_ and you and/or team mates, can create _feature_ branches to develop and try features, which will be merged to `master` in the usual way via PRs. 
 
-Click on **New** - _Pipeline_ and I suggest to create a new branch to work on. As you add/update _components_ to your data factory, you will see folders and files will be created/updated via commits in the repo in the active branch every time you hit the **Save** button at the top left of the _canvas_ area, where you set the activities and dataflow transformations. You can check this at any moment going to DevOps Repo, selecting the current working branch and click on **History** to see the commits. You barely can control this commits as automatically set by the platform. [* photo *]
+Click on **New** - _Pipeline_ to create a new data pipeline but I suggest to create a new branch (at the top left [- photo -]) to work on prior to start adding assets. As you add/update _components_ to your data factory, you will see folders and files will be created/updated via commits in the repo active branch every time you hit the **Save** button at the top left of the _canvas_ area, where you set the activities and dataflow transformations. You can check this at any moment going to DevOps Repo, selecting the current working branch and click on **History** to see the commits. You barely can control these commits messages as automatically set by the platform. [- photo -]
 
 So now the repo holding the code is already linked to the DevOps project, seeding the CICD pipeline
 
@@ -46,9 +46,13 @@ First we have to connect our repo with the CICD. Click in the `+` sign to add a 
 
 When the data pipeline we are working on is finished, we can do a PR to review then merge the work in the `master` branch. It's in this moment when the build and deployment to _uat_ then _production_ process starts.
 
-First we have to set up the build stage. For the ADF case, it will _compile_ the repo files to yield an _ARM template_ with the assets in the DataFactory and the parameters used in any of those asets. To set up the build, go to DevOps, _Pipelines_ and click on **New pipeline** button. Choose _Azure Repos Git_ and choose the repo your work belongs to and then _Starter pipeline_ and you will get a sample of a very simple, generic and mostly useless `azure-pipelines.yaml` which you will have to customize. Now what is better is follow [this Microsoft doc](https://docs.microsoft.com/en-us/azure/data-factory/continuous-integration-delivery-improvements#the-new-cicd-flow) for the new and easy way to build the artifact out of the project. 
+> There are some pre-requisites before going straight to setup the CICD in Azure DevOps, like having a subscription, organization and DevOps project. The company should already have that in place, otherwise we have to find the right people to set up these prerequisites for you.
 
-As we have to add a file _external_ to the DataFactory we are working on, it is better:
+First we have to set up the build stage. For the ADF case, it will actually _compile_ the repo files to yield an _ARM template_ with the assets in the DataFactory and the parameters used in any of those asets. 
+
+To set up the build, go to DevOps, _Pipelines_ and click on **New pipeline** button. Choose _Azure Repos Git_ and choose the repo your work belongs to and then _Starter pipeline_ and you will get a sample of a very simple, generic and mostly useless `azure-pipelines.yaml` which you will have to customize. This file describes the build process for Azure pipelines. Now what is better is follow [this Microsoft doc](https://docs.microsoft.com/en-us/azure/data-factory/continuous-integration-delivery-improvements#the-new-cicd-flow) for the new and easy way to build the artifact out of the project. 
+
+ As according to that document we have to add a file _external_ to the DataFactory we are working on, it is better:
 
 - Merge the branch into master. Click on _Create a pull request_ and follow the usual flow to get the branch merged into `master`
 - Create a new branch and add a `package.json` file with the following content as per the link above:
@@ -62,9 +66,9 @@ As we have to add a file _external_ to the DataFactory we are working on, it is 
     }
 } 
 ```
-- Commit, PR again and merge in master
+- Commit, PR again and merge into `master`
 
-Once we have the `package.json` file in our repo, paste the _yaml_ code found in the link above replacing the yaml code mentioned above (follow the link to know how). Then click `Save` in the combo-button at the right top. 
+Once we have the `package.json` file in our repo, paste the _yaml_ code found in the link above replacing the generic yaml Azure provides by default (follow the link to know how). Then click `Save` in the combo-button at the right top [- maybe photo -]. 
 
 Now we are ready to run the pipeline and see if everything works ok.
 
@@ -76,18 +80,18 @@ To create a release pipeline first for _uat_, assuming all necessary resources a
 
 #### Add artifact
 
-Click on _Add and artifact_ panel [- photo -] and fill the right value of the Build pipeline we just created before and click **Add** at the bottom. 
+Click on _Add and artifact_ panel [- photo -] fill the right value of the Build pipeline we just created before and click **Add** at the bottom. 
 
-In the same panel, click on the bolt at the top right to set the _Continuous deployment trigger_ and enable the first check. The release will be automatically triggered every time a PR is merged.
+In the same panel, click on the bolt at the top right to set the _Continuous deployment trigger_ and enable the first check. The release will be automatically triggered every time a successful build is yielded.
 
 #### Configure the UAT stage
 
-First we will create some variables to configure the stage for _Location_, _ResourceGroup_ and _DataFactory_ name. 
+First we will create some variables to configure the stage for _Location_, _ResourceGroup_ and _DataFactory_. Names may change as you wish: 
 - _Location_ has to be the **same** as the location of the Resource group and the Data Factory
 - _ResourceGroup_ has to be the resource group where we are going to deploy the ADF, so the name of the UAT resource group we have
 - _DataFactory_ has to be the name of the DataFactory resource in the resource group defined above
 
-Now, click on the link inside the panel and, from the list, choose _ARM template deployment_. It shows a warning message (in red) [- maybe photo -], so click on it to configure it. The main details to fill in are:
+Now, click on the _1 job, 0 tasks_ link inside the panel and, from the list, choose _ARM template deployment_. It shows a warning message (in red) [- maybe photo -], so click on it to configure it. The main details to fill in are:
 
 - Choose the right Service connection and Subscription (they should be the organization's ones, but I've used a different ones)
 - set _Location_ to `$(Location)` to use the name of the `Location` variable just created.
@@ -99,5 +103,5 @@ Create a new release and check
 - Every indicator is green -> 🎉
 - Go to the resource group in the Azure Portal and check the DataFactory resource, before empty, now has the same assets than that one in the development resource group.
 
-
+Try to debug/run the just deployed pipeline to see if all resources are ok also in the environment.
 
