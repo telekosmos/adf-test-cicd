@@ -22,13 +22,16 @@ We won't get deeper in the resource creation, just mention we should create thre
 
 **Key vault** will hold the credentials which will be used to access to database and storage account from the datasets defined in the DataFactory. The _connection_ with the vault is done through _Linked services_ in the Data Factory. Follow [this Azure document](https://docs.microsoft.com/bs-latn-ba/azure/data-factory/store-credentials-in-key-vault) on how to set it up. 
 
-> In order to successfully connect the Data Factory to a SQL Database instance through the Azure Vault and its linked service, the secret in the vault has to hold the **ADO.NET connection string**, not just the password, as some articles, tutorials hint to take that path. To do this one, go to the database resource - Properties then click on the _Show database connection string_ link ![SQL database properties view](./img/Screenshot12.png "SQL database properties connection string")
+> In order to successfully connect the Data Factory to a SQL Database instance through the Azure Vault and its linked service, the secret in the vault has to hold the **ADO.NET connection string**, not just the password, as some articles, tutorials hint to take that path. To do this one, go to the database resource - Properties then click on the _Show database connection string_ link 
+
+![SQL database properties view](./img/Screenshot12.png "SQL database properties connection string")
 
 Then copy the `ADO.NET` connection string. Edit that string replacing the `{your_password}` placeholder with the password set for the database and create a secret in the vault with the resulting string (and you can name it with something like `SQLDatabase<databasename>ConnectionString`).
 
 ### Set up repository for DataFactory and DevOps
 
 Once in ADF _builder_, click on the top left **Set up code repository** button and follow the _wizard_ to connect the repo. 
+
 ![Set up repository button](./img/Screenshot1.png "Setup code repository")
 
 Choose _Azure DevOps Git_ and _Active Directory_ then **Continue** at the bottom. Then follow the wizard to setup the actual repo properties. When you set the name in _Repository name_ you will see automatically new boxes to pre-filled. To follow the standard, leave them all as they are.
@@ -36,6 +39,7 @@ Choose _Azure DevOps Git_ and _Active Directory_ then **Continue** at the bottom
 This repo is now a usual one, where the `master`/`main` branch will be the so-called _collaboration branch_ and you and/or team mates, can create _feature_ branches to develop and try features, which will be merged to `master` in the usual way via PRs. 
 
 Click on **New** - _Pipeline_ to create a new data pipeline but I suggest to create a new branch (at the top left to work on prior to start adding assets.
+
 ![Creating new branch button](./img/Screenshot11.png "New branch")
 
  As you add/update _assets_ to your data factory, you will see folders and files will be created/updated via commits in the repo active branch every time you hit the **Save** button at the top left of the _canvas_ area, where you set the activities and dataflows. You can check this at any moment going to DevOps Repo, selecting the current working branch and click on **History** to see the commits. You barely can control these commit messages as they are automatically set by the platform.
